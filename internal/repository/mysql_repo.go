@@ -11,6 +11,7 @@ import (
 
 type MysqlRepositoryInterface interface {
 	InsertUser(ctx context.Context, user model.User) (model.User, error)
+	GetUserByID(ctx context.Context, userID string) (model.User, error)
 }
 
 type mySqlRepository struct {
@@ -42,4 +43,16 @@ func (m *mySqlRepository) InsertUser(ctx context.Context, user model.User) (mode
 	}
 
 	return result, nil
+}
+
+func (m *mySqlRepository) GetUserByID(ctx context.Context, userID string) (model.User, error) {
+	var user model.User
+	sqlstr := "SELECT id, name, address, email FROM user WHERE id = ?"
+
+	err := m.db.GetContext(ctx, &user, sqlstr, userID)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	return user, nil
 }

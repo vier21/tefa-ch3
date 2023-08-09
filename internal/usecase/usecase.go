@@ -9,6 +9,7 @@ import (
 
 type UserInterface interface {
 	RegisterUser(ctx context.Context, user model.User) (Result, error)
+	GetUserByID(ctx context.Context, userID string) (model.User, error)
 }
 
 type Result struct {
@@ -43,4 +44,13 @@ func (u *userUsecase) RegisterUser(ctx context.Context, user model.User) (Result
 		UserMysql: insMysql,
 		UserMongo: insMongo,
 	}, nil
+}
+
+func (u *userUsecase) GetUserByID(ctx context.Context, userID string) (model.User, error) {
+	user, err := u.userMysqlRepository.GetUserByID(ctx, userID)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	return user, nil
 }
