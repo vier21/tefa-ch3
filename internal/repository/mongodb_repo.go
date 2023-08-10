@@ -45,3 +45,22 @@ func (m *MongoRepository) InsertUser(ctx context.Context, user model.User) (mode
 	return user, nil
 
 }
+
+func (m *MongoRepository) GetUserByAccountID(ctx context.Context, accountID int) (model.User, error) {
+	coll := m.db.Database(config.GetConfig().UserDBName).Collection(m.collection)
+
+	// Sesuaikan filter sesuai dengan tipe data accountID yang Anda gunakan
+	filter := bson.M{"id": accountID}
+
+	var user model.User
+	err := coll.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return model.User{}, fmt.Errorf("user with accountID %d not found", accountID)
+		}
+		return model.User{}, err
+	}
+
+	return user, nil
+}
+

@@ -43,3 +43,16 @@ func (m *mySqlRepository) InsertUser(ctx context.Context, user model.User) (mode
 
 	return result, nil
 }
+
+func (m *mySqlRepository) GetUserByAccountID(ctx context.Context, accountID int) (model.User, error) {
+	sqlstr := "SELECT id, name, address, email FROM user WHERE id = ?"
+	
+	var user model.User
+	err := m.db.GetContext(ctx, &user, sqlstr, accountID)
+	if err != nil {
+		return model.User{}, err
+	}
+	
+	return user, nil
+}
+

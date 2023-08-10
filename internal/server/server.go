@@ -58,6 +58,8 @@ func (a *ApiServer) Run() {
 	r := a.NewRouter()
 
 	r.Post("/user", a.RegisterUserHandler)
+	r.Get("/user/accountID", a.GetUserByAccountIDHandler)
+
 
 	go func() {
 		log.Printf("Server start on localhost%s \n", config.GetConfig().ServerPort)
@@ -117,3 +119,34 @@ func (s *ApiServer) RegisterUserHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 }
+
+func (s *ApiServer) GetUserByAccountIDHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+
+	accountIDStr := chi.URLParam(r, "accountID")
+	accountID, err := strconv.Atoi(accountIDStr)
+	if err != nil {
+		http.Error(w, "invalid accountID", http.StatusBadRequest)
+		return
+	}
+
+	user, err := s.Services.GetUserByAccountID(r.Context(), accountID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	httpcode := strconv.Itoa(http.StatusOK)
+	status := fmt.Sprintf("Success (%s)", httpcode)
+
+	res := Response{
+		Status: status,
+		Data:   user,
+	}
+
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, ErrFetchResp, http.StatusInternalServerError)
+		return
+	}
+}
+
