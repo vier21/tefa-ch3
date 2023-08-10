@@ -11,7 +11,6 @@ import (
 	"github.com/vier21/tefa-ch3/internal/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type MongodbRepositoryInterface interface {
@@ -46,29 +45,6 @@ func (m *MongoRepository) InsertUser(ctx context.Context, user model.User) (mode
 
 	if doc.InsertedID.(string) != id {
 		return model.User{}, fmt.Errorf("document not contain expected id %s", id)
-	}
-
-	return user, nil
-
-}
-
-func (m *MongoRepository) GetUser(ctx context.Context, userid string) (model.User, error) {
-	coll := m.db.Database(config.GetConfig().UserDBName).Collection(m.collection)
-	filter := bson.M{
-		"_id": userid,
-	}
-	doc := coll.FindOne(ctx, filter)
-
-	if doc.Err() != nil {
-		log.Println(doc.Err().Error())
-
-	}
-
-	var user model.User
-
-	if err := doc.Decode(&user); err != nil {
-		log.Println(err.Error())
-		return model.User{}, err
 	}
 
 	return user, nil

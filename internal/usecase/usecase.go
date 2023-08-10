@@ -15,8 +15,6 @@ type UserInterface interface {
 	RegisterAccount(ctx context.Context, account model.Account) (model.Account, error)
 	GetUserByAccountID(ctx context.Context, accountID string) (model.User, error)
 	GetUserDataMongo(ctx context.Context, id string) (model.User, error)
-	GetUserByID(ctx context.Context, userID string) (model.User, error)
-	RegisterAccount(ctx context.Context, account model.Account) (model.Account, error)
 }
 
 type Result struct {
@@ -65,64 +63,6 @@ func (u *userUsecase) GetUserDataMongo(ctx context.Context, id string) (model.Us
 	}
 
 	return user, nil
-}
-
-func (u *userUsecase) GetUserByID(ctx context.Context, userID string) (model.User, error) {
-	if userID == "" {
-		return model.User{}, fmt.Errorf("error id not specified")
-	}
-	user, err := u.userMysqlRepository.GetUserByID(ctx, userID)
-	if err != nil {
-		log.Println("error retrieving user from mysql: %s", err.Error())
-		return model.User{}, err
-	}
-
-	return user, nil
-}
-
-func (u *userUsecase) RegisterAccount(ctx context.Context, account model.Account) (model.Account, error) {
-	account, err := u.userMysqlRepository.InsertAccount(ctx, account)
-	if err != nil {
-		return model.Account{}, err
-	}
-
-	return account, nil
-}
-
-func (u *userUsecase) GetUserDataMongo(ctx context.Context, id string) (model.User, error) {
-	if id == "" {
-		return model.User{}, fmt.Errorf("error id not specified")
-	}
-	user, err := u.userMongoRepository.GetUser(ctx, id)
-
-	if err != nil {
-		log.Println("error retrieving user: %s", err.Error())
-		return model.User{}, err
-	}
-
-	return user, nil
-}
-
-func (u *userUsecase) GetUserByID(ctx context.Context, userID string) (model.User, error) {
-	if userID == "" {
-		return model.User{}, fmt.Errorf("error id not specified")
-	}
-	user, err := u.userMysqlRepository.GetUserByID(ctx, userID)
-	if err != nil {
-		log.Println("error retrieving user from mysql: %s", err.Error())
-		return model.User{}, err
-	}
-
-	return user, nil
-}
-
-func (u *userUsecase) RegisterAccount(ctx context.Context, account model.Account) (model.Account, error) {
-	account, err := u.userMysqlRepository.InsertAccount(ctx, account)
-	if err != nil {
-		return model.Account{}, err
-	}
-
-	return account, nil
 }
 
 func (u *userUsecase) GetUserByID(ctx context.Context, userID string) (model.User, error) {
