@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"context"
+	"fmt"
+	"log"
 
 	"github.com/vier21/tefa-ch3/internal/model"
 	"github.com/vier21/tefa-ch3/internal/repository"
@@ -9,6 +11,7 @@ import (
 
 type UserInterface interface {
 	RegisterUser(ctx context.Context, user model.User) (Result, error)
+	GetUserDataMongo(ctx context.Context, id string) (model.User, error)
 }
 
 type Result struct {
@@ -43,4 +46,18 @@ func (u *userUsecase) RegisterUser(ctx context.Context, user model.User) (Result
 		UserMysql: insMysql,
 		UserMongo: insMongo,
 	}, nil
+}
+
+func (u *userUsecase) GetUserDataMongo(ctx context.Context, id string) (model.User, error) {
+	if id == "" {
+		return model.User{}, fmt.Errorf("error id not specified")
+	}
+	user, err := u.userMongoRepository.GetUser(ctx, id)
+
+	if err != nil {
+		log.Println("error retrieving user: %s", err.Error())
+		return model.User{}, err
+	}
+
+	return user, nil
 }

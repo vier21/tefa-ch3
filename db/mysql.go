@@ -16,7 +16,6 @@ func InitMysqlDB() (err error) {
 		fmt.Printf("connect DB failed, err:%v\n", err)
 		return
 	}
-	DB.SetMaxOpenConns(20)
-	DB.SetMaxIdleConns(10)
+	
 	return
 }

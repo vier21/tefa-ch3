@@ -58,6 +58,7 @@ func (a *ApiServer) Run() {
 	r := a.NewRouter()
 
 	r.Post("/user", a.RegisterUserHandler)
+	r.Get("/{id}/user", a.GetUserMongoHandler)
 
 	go func() {
 		log.Printf("Server start on localhost%s \n", config.GetConfig().ServerPort)
@@ -85,6 +86,25 @@ func (a *ApiServer) GracefullShutdown() {
 	}
 
 	log.Println("Server stopped gracefully")
+}
+
+func (s *ApiServer) GetUserMongoHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+
+	id := chi.URLParam(r, "id")
+
+	user, err := s.Services.GetUserDataMongo(r.Context(), id)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }
 
 func (s *ApiServer) RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
