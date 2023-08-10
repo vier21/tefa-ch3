@@ -9,6 +9,8 @@ import (
 
 type UserInterface interface {
 	RegisterUser(ctx context.Context, user model.User) (Result, error)
+	GetUserByID(ctx context.Context, userID string) (model.User, error)
+	RegisterAccount(ctx context.Context, account model.Account) (model.Account, error)
 	GetUserByAccountID(ctx context.Context, accountID string) (model.User, error)
 }
 
@@ -21,8 +23,6 @@ type userUsecase struct {
 	userMysqlRepository repository.MysqlRepositoryInterface
 	userMongoRepository repository.MongodbRepositoryInterface
 }
-
-
 
 func NewUserUsecase(mysql repository.MysqlRepositoryInterface, mongodb repository.MongodbRepositoryInterface) *userUsecase {
 	return &userUsecase{
@@ -48,22 +48,29 @@ func (u *userUsecase) RegisterUser(ctx context.Context, user model.User) (Result
 	}, nil
 }
 
-func (u *userUsecase) GetUserByAccountID(ctx context.Context, accountID int) (Result, error) {
-	userMysql, err := u.userMysqlRepository.GetUserByAccountID(ctx, accountID)
+func (u *userUsecase) GetUserByID(ctx context.Context, userID string) (model.User, error) {
+	user, err := u.userMysqlRepository.GetUserByID(ctx, userID)
 	if err != nil {
-		// Jika tidak ditemukan di MySQL, coba mencari di MongoDB
-		userMongo, err := u.userMongoRepository.GetUserByAccountID(ctx, accountID)
-		if err != nil {
-			return Result{}, err
-		}
-		return Result{
-			UserMysql: model.User{},
-			UserMongo: userMongo,
-		}, nil
+		return model.User{}, err
 	}
-	return Result{
-		UserMysql: userMysql,
-		UserMongo: model.User{},
-	}, nil
+
+	return user, nil
 }
 
+func (u *userUsecase) RegisterAccount(ctx context.Context, account model.Account) (model.Account, error) {
+	account, err := u.userMysqlRepository.InsertAccount(ctx, account)
+	if err != nil {
+		return model.Account{}, err
+	}
+
+	return account, nil
+}
+
+func (u *userUsecase) GetUserByAccountID(ctx context.Context, accountID string) (model.User, error) {
+	user, err := u.userMysqlRepository.GetUserByAccountID(ctx, accountID)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	return user, nil
+}
