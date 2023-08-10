@@ -13,6 +13,7 @@ type UserInterface interface {
 	RegisterUser(ctx context.Context, user model.User) (Result, error)
 	GetUserDataMongo(ctx context.Context, id string) (model.User, error)
 	GetUserByID(ctx context.Context, userID string) (model.User, error)
+	RegisterAccount(ctx context.Context, account model.Account) (model.Account, error)
 }
 
 type Result struct {
@@ -74,4 +75,13 @@ func (u *userUsecase) GetUserByID(ctx context.Context, userID string) (model.Use
 	}
 
 	return user, nil
+}
+
+func (u *userUsecase) RegisterAccount(ctx context.Context, account model.Account) (model.Account, error) {
+	account, err := u.userMysqlRepository.InsertAccount(ctx, account)
+	if err != nil {
+		return model.Account{}, err
+	}
+
+	return account, nil
 }
