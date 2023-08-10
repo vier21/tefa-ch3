@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -12,6 +13,7 @@ import (
 type MysqlRepositoryInterface interface {
 	InsertUser(ctx context.Context, user model.User) (model.User, error)
 	GetUserByID(ctx context.Context, userID string) (model.User, error)
+	InsertAccount(ctx context.Context, account model.Account) (model.Account, error)
 }
 
 type mySqlRepository struct {
@@ -55,4 +57,43 @@ func (m *mySqlRepository) GetUserByID(ctx context.Context, userID string) (model
 	}
 
 	return user, nil
+}
+
+func (m *mySqlRepository) InsertAccount(ctx context.Context, account model.Account) (model.Account, error) {
+	var accounts []model.Account
+	rows, err := m.db.QueryContext(ctx, "SELECT * FROM account WHERE user_id=?", account.UserID)
+	if err != nil {
+		return model.Account{}, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var account model.Account
+		err := rows.Scan(&account.AccountID, &account.MsisdnCustomer, &account.UserID)
+		if err != nil {
+			return model.Account{}, err
+		}
+		accounts = append(accounts, account)
+	}
+
+	if err := rows.Err(); err != nil {
+		return model.Account{}, err
+	}
+
+	if len(accounts) >= 3 {
+		return model.Account{}, errors.New("MSISDN Limit Reached")
+	}
+
+	sqlstr := "INSERT INTO account (id, msisdn_customer, user_id) VALUES (?, ?, ?)"
+	account.AccountID = uuid.NewString()
+
+	_, err = m.db.ExecContext(ctx, sqlstr, account.AccountID, account.MsisdnCustomer, account.UserID)
+
+	if err != nil {
+		return model.Account{}, err
+	}
+
+	return account, nil
+
 }

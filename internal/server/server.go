@@ -143,3 +143,33 @@ func (a *ApiServer) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (a *ApiServer) RegisterAccountHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+
+	var req model.Account
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, ErrReqBodyNotValid, http.StatusBadRequest)
+		return
+	}
+
+	account, err := a.Services.RegisterAccount(r.Context(), req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	httpcode := strconv.Itoa(http.StatusOK)
+	status := fmt.Sprintf("Success (%s)", httpcode)
+
+	res := Response{
+		Status: status,
+		Data:   account,
+	}
+
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, "fail to fetch responses", http.StatusInternalServerError)
+		return
+	}
+
+}
