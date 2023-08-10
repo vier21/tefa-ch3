@@ -59,6 +59,7 @@ func (a *ApiServer) Run() {
 
 	r.Post("/user", a.RegisterUserHandler)
 	r.Get("/{id}/user", a.GetUserMongoHandler)
+	r.Get("/user/{userID}", a.GetUserHandler)
 
 	go func() {
 		log.Printf("Server start on localhost%s \n", config.GetConfig().ServerPort)
@@ -136,4 +137,29 @@ func (s *ApiServer) RegisterUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+}
+
+func (a *ApiServer) GetUserHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+
+	userID := chi.URLParam(r, "userID") // Get userID from URL parameter
+
+	user, err := a.Services.GetUserByID(r.Context(), userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	httpcode := strconv.Itoa(http.StatusOK)
+	status := fmt.Sprintf("Success (%s)", httpcode)
+
+	res := Response{
+		Status: status,
+		Data:   user,
+	}
+
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, ErrFetchResp, http.StatusInternalServerError)
+		return
+	}
 }
