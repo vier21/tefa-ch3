@@ -59,9 +59,9 @@ func (a *ApiServer) Run() {
 
 	r.Post("/user", a.RegisterUserHandler)
 	r.Get("/{id}/user/mysql", a.GetUserMysqlHandler)
+	r.Get("/{id}/user/mongo", a.GetUserMongoHandler)
 	r.Post("/account", a.RegisterAccountHandler)
 	r.Get("/{accountID}/account", a.GetUserByAccountIDHandler)
-	r.Get("/{id}/user/mongo", a.GetUserMongoHandler)
 	
 	go func() {
 		log.Printf("Server start on localhost%s \n", config.GetConfig().ServerPort)
