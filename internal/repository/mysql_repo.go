@@ -100,13 +100,22 @@ func (m *mySqlRepository) InsertAccount(ctx context.Context, account model.Accou
 }
 
 func (m *mySqlRepository) GetUserByAccountID(ctx context.Context, accountID string) (model.User, error) {
-	sqlstr := "SELECT id, name, address, email FROM user WHERE account_id = ?"
+	// mengambil userID berdasarkan AccountID
+	accountSQL := "SELECT user_id FROM account WHERE id = ?"
+	var userID string
+	err := m.db.GetContext(ctx, &userID, accountSQL, accountID)
+	if err != nil {
+		return model.User{}, err
+	}
 
+	// mencari informasi berdasarkan
+	userSQL := "SELECT id, name, address, email FROM user WHERE id = ?"
 	var user model.User
-	err := m.db.GetContext(ctx, &user, sqlstr, accountID)
+	err = m.db.GetContext(ctx, &user, userSQL, userID)
 	if err != nil {
 		return model.User{}, err
 	}
 
 	return user, nil
 }
+
