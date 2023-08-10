@@ -59,6 +59,7 @@ func (a *ApiServer) Run() {
 
 	r.Post("/user", a.RegisterUserHandler)
 	r.Get("/user/{userID}", a.GetUserHandler)
+	r.Post("/account", a.RegisterAccountHandler)
 
 	go func() {
 		log.Printf("Server start on localhost%s \n", config.GetConfig().ServerPort)
