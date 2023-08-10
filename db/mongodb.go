@@ -16,7 +16,7 @@ var MongoCLI *mongo.Client
 
 func InitMongoDB() (err error) {
 
-	MongoCLI, err = mongo.Connect(context.Background(), options.Client().ApplyURI(config.GetConfig().MongoDBURL))
+	MongoCLI, err = mongo.Connect(context.Background(), options.Client().ApplyURI(config.GetConfig().MongoDBURL).SetMaxPoolSize(50))
 	if err != nil {
 		fmt.Printf("connect DB failed, err:%v\n", err)
 		return
