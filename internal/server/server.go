@@ -58,6 +58,9 @@ func (a *ApiServer) Run() {
 	r := a.NewRouter()
 
 	r.Post("/user", a.RegisterUserHandler)
+	r.Get("/user/{userID}", a.GetUserHandler)
+	r.Post("/account", a.RegisterAccountHandler)
+	r.Get("/{accountID}/account", a.GetUserByAccountIDHandler)
 	r.Get("/{id}/user", a.GetUserMongoHandler)
 	r.Get("/user/{userID}", a.GetUserHandler)
 	r.Post("/account", a.RegisterAccountHandler)
@@ -201,4 +204,140 @@ func (a *ApiServer) RegisterAccountHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+}
+
+func (a *ApiServer) GetUserHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+
+	userID := chi.URLParam(r, "userID")
+
+	user, err := a.Services.GetUserByID(r.Context(), userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	httpcode := strconv.Itoa(http.StatusOK)
+	status := fmt.Sprintf("Success (%s)", httpcode)
+
+	res := Response{
+		Status: status,
+		Data:   user,
+	}
+
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, ErrFetchResp, http.StatusInternalServerError)
+		return
+	}
+}
+
+func (a *ApiServer) RegisterAccountHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+
+	var req model.Account
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, ErrReqBodyNotValid, http.StatusBadRequest)
+		return
+	}
+
+	account, err := a.Services.RegisterAccount(r.Context(), req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	httpcode := strconv.Itoa(http.StatusOK)
+	status := fmt.Sprintf("Success (%s)", httpcode)
+
+	res := Response{
+		Status: status,
+		Data:   account,
+	}
+
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, "fail to fetch responses", http.StatusInternalServerError)
+		return
+	}
+
+}
+
+func (a *ApiServer) GetUserHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+
+	userID := chi.URLParam(r, "userID") // Get userID from URL parameter
+
+	user, err := a.Services.GetUserByID(r.Context(), userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	httpcode := strconv.Itoa(http.StatusOK)
+	status := fmt.Sprintf("Success (%s)", httpcode)
+
+	res := Response{
+		Status: status,
+		Data:   user,
+	}
+
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, ErrFetchResp, http.StatusInternalServerError)
+		return
+	}
+}
+
+func (a *ApiServer) RegisterAccountHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+
+	var req model.Account
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, ErrReqBodyNotValid, http.StatusBadRequest)
+		return
+	}
+
+	account, err := a.Services.RegisterAccount(r.Context(), req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	httpcode := strconv.Itoa(http.StatusOK)
+	status := fmt.Sprintf("Success (%s)", httpcode)
+
+	res := Response{
+		Status: status,
+		Data:   account,
+	}
+
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, "fail to fetch responses", http.StatusInternalServerError)
+		return
+	}
+
+}
+
+func (s *ApiServer) GetUserByAccountIDHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+
+	accountIDStr := chi.URLParam(r, "accountID")
+	accountID := accountIDStr // Sesuaikan tipe data accountID sesuai perubahan di model.go
+
+	user, err := s.Services.GetUserByAccountID(r.Context(), accountID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	httpcode := strconv.Itoa(http.StatusOK)
+	status := fmt.Sprintf("Success (%s)", httpcode)
+
+	res := Response{
+		Status: status,
+		Data:   user,
+	}
+
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, ErrFetchResp, http.StatusInternalServerError)
+		return
+	}
 }
