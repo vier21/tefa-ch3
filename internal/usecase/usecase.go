@@ -11,6 +11,8 @@ import (
 
 type UserInterface interface {
 	RegisterUser(ctx context.Context, user model.User) (Result, error)
+	GetUserDataMongo(ctx context.Context, id string) (model.User, error)
+	GetUserByID(ctx context.Context, userID string) (model.User, error)
 }
 
 type Result struct {
@@ -62,8 +64,12 @@ func (u *userUsecase) GetUserDataMongo(ctx context.Context, id string) (model.Us
 }
 
 func (u *userUsecase) GetUserByID(ctx context.Context, userID string) (model.User, error) {
+	if userID == "" {
+		return model.User{}, fmt.Errorf("error id not specified")
+	}
 	user, err := u.userMysqlRepository.GetUserByID(ctx, userID)
 	if err != nil {
+		log.Println("error retrieving user from mysql: %s", err.Error())
 		return model.User{}, err
 	}
 

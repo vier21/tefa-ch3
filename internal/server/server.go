@@ -101,7 +101,15 @@ func (s *ApiServer) GetUserMongoHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(user); err != nil {
+	httpcode := strconv.Itoa(http.StatusOK)
+	status := fmt.Sprintf("Success (%s)", httpcode)
+
+	res := Response{
+		Status: status,
+		Data:   user,
+	}
+
+	if err := json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -142,7 +150,7 @@ func (s *ApiServer) RegisterUserHandler(w http.ResponseWriter, r *http.Request) 
 func (a *ApiServer) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 
-	userID := chi.URLParam(r, "userID") // Get userID from URL parameter
+	userID := chi.URLParam(r, "userID")
 
 	user, err := a.Services.GetUserByID(r.Context(), userID)
 	if err != nil {
