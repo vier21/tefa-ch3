@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/vier21/tefa-ch3/config"
 	"github.com/vier21/tefa-ch3/internal/model"
 	"github.com/vier21/tefa-ch3/internal/usecase"
 )
@@ -41,7 +40,7 @@ func NewServer(usersvc usecase.UserInterface) *ApiServer {
 		Services: usersvc,
 		Router:   mux,
 		Server: &http.Server{
-			Addr:         config.GetConfig().ServerPort,
+			Addr:         ":3001",
 			Handler:      mux,
 			IdleTimeout:  120 * time.Second,
 			WriteTimeout: 1 * time.Second,
@@ -62,9 +61,9 @@ func (a *ApiServer) Run() {
 	r.Get("/{id}/user/mongo", a.GetUserMongoHandler)
 	r.Post("/account", a.RegisterAccountHandler)
 	r.Get("/{accountID}/account", a.GetUserByAccountIDHandler)
-	
+
 	go func() {
-		log.Printf("Server start on localhost%s \n", config.GetConfig().ServerPort)
+		log.Printf("Server start on localhost%s \n", ":3001")
 		err := a.Server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Server Error: %s \n", err)
